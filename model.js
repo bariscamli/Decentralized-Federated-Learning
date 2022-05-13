@@ -17,6 +17,7 @@
 
 const tf = require('@tensorflow/tfjs');
 
+// LeNet-5
 const model = tf.sequential();
 model.add(tf.layers.conv2d({
   inputShape: [28, 28, 1],

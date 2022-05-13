@@ -3,7 +3,6 @@
 project/.bloop/
 
 target/
-data/
 venv/
 .idea/
 metastore_db/
@@ -11,3 +10,4 @@ derby.log
 **/.DS_Store
 
 node_modules/
+test_tf.js

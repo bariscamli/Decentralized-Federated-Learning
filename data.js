@@ -23,10 +23,6 @@ const util = require('util');
 const readFile = util.promisify(fs.readFile);
 
 // MNIST data constants:
-const TRAIN_IMAGES_FILE = 'data/mnist/non_iid_unbalanced/c1-images-idx3-ubyte';
-const TRAIN_LABELS_FILE = 'data/mnist/non_iid_unbalanced/c1-label-idx1-ubyte';
-const TEST_IMAGES_FILE = 'data/mnist/non_iid_unbalanced/c1-images-idx3-ubyte';
-const TEST_LABELS_FILE = 'data/mnist/non_iid_unbalanced/c1-label-idx1-ubyte';
 const IMAGE_HEADER_MAGIC_NUM = 2051;
 const IMAGE_HEADER_BYTES = 16;
 const IMAGE_HEIGHT = 28;
@@ -106,19 +102,24 @@ async function loadLabels(filename) {
 
 /** Helper class to handle loading training and test data. */
 class MnistDataset {
-  constructor() {
+  constructor(nodeId) {
+    this.nodeId = nodeId
     this.dataset = null;
     this.trainSize = 0;
     this.testSize = 0;
     this.trainBatchIndex = 0;
     this.testBatchIndex = 0;
+    this.trainImagesFile = `data/mnist/non_iid_unbalanced/c${nodeId}-images-idx3-ubyte`;
+    this.trainLabelsFile = `data/mnist/non_iid_unbalanced/c${nodeId}-label-idx1-ubyte`;
+    this.testImagesFile = `data/mnist/non_iid_unbalanced/c${nodeId}-images-idx3-ubyte`;
+    this.testLabelsFile = `data/mnist/non_iid_unbalanced/c${nodeId}-label-idx1-ubyte`;
   }
 
   /** Loads training and test data. */
   async loadData() {
     this.dataset = await Promise.all([
-      loadImages(TRAIN_IMAGES_FILE), loadLabels(TRAIN_LABELS_FILE),
-      loadImages(TEST_IMAGES_FILE), loadLabels(TEST_LABELS_FILE)
+      loadImages(this.trainImagesFile), loadLabels(this.trainLabelsFile),
+      loadImages(this.testImagesFile), loadLabels(this.testLabelsFile)
     ]);
     this.trainSize = this.dataset[0].length;
     this.testSize = this.dataset[2].length;
@@ -169,4 +170,8 @@ class MnistDataset {
   }
 }
 
-module.exports = new MnistDataset();
+function getObject(nodeId){
+  return new MnistDataset(nodeId)
+}
+
+module.exports = getObject
