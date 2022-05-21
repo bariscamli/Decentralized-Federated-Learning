@@ -111,8 +111,8 @@ class MnistDataset {
     this.testBatchIndex = 0;
     this.trainImagesFile = `data/mnist/non_iid_unbalanced/c${nodeId}-images-idx3-ubyte`;
     this.trainLabelsFile = `data/mnist/non_iid_unbalanced/c${nodeId}-label-idx1-ubyte`;
-    this.testImagesFile = `data/mnist/non_iid_unbalanced/c${nodeId}-images-idx3-ubyte`;
-    this.testLabelsFile = `data/mnist/non_iid_unbalanced/c${nodeId}-label-idx1-ubyte`;
+    this.testImagesFile = `data/mnist/t10k-images-idx3-ubyte`;
+    this.testLabelsFile = `data/mnist/t10k-labels-idx1-ubyte`;
   }
 
   /** Loads training and test data. */

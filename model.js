@@ -25,6 +25,8 @@ model.add(tf.layers.conv2d({
   kernelSize: 5,
   strides:1,
   activation: 'tanh',
+  seed:0,
+  kernelInitializer:{ className: 'VarianceScaling',config:{seed: 0}},
 }));
 model.add(tf.layers.averagePooling2d({poolSize: [2, 2]}));
 model.add(tf.layers.conv2d({
@@ -32,12 +34,17 @@ model.add(tf.layers.conv2d({
   kernelSize: 5,
   strides:1,
   activation: 'tanh',
+  seed:0,
+  kernelInitializer:{ className: 'VarianceScaling',config:{seed: 0}},
 }));
 model.add(tf.layers.averagePooling2d({poolSize: [2, 2]}));
 model.add(tf.layers.flatten());
-model.add(tf.layers.dense({units: 120, activation: 'tanh'}));
-model.add(tf.layers.dense({units: 84, activation: 'tanh'}));
-model.add(tf.layers.dense({units: 10, activation: 'softmax'}));
+model.add(tf.layers.dense({units: 120, activation: 'tanh',seed:0,kernelInitializer:{ className: 'VarianceScaling',
+config:{seed: 0}}}));
+model.add(tf.layers.dense({units: 84, activation: 'tanh',seed:0,kernelInitializer:{ className: 'VarianceScaling',
+config:{seed: 0}}}));
+model.add(tf.layers.dense({units: 10, activation: 'softmax',seed:0,kernelInitializer:{ className: 'VarianceScaling',
+config:{seed: 0}}}));
 
 model.compile({
   optimizer: 'sgd',

@@ -13,11 +13,11 @@ const nodeAddressPort = require('./data/nodes/address.json')
 const currentNodeId = process.argv.slice(2)[0]
 
 const tf = require('@tensorflow/tfjs-node')
-//const data = require('./data')(currentNodeId)
-const data = require('./data')(1)
+const data = require('./data')(currentNodeId)
+//const data = require('./data')(1)
 const model = require('./model')
 const utils = require('./utils')
-const COMMUNICATION_ROUND = 5
+const COMMUNICATION_ROUND = 10
 
 const createNode = async (peerAddress, peerIdFromJson) => {
   const node = await Libp2p.create({
@@ -39,8 +39,7 @@ const createNode = async (peerAddress, peerIdFromJson) => {
   ; (async () => {
     await data.loadData()
     const { images: trainImages, labels: trainLabels } = data.getTrainData()
-    const { images: testImages, labels: testLabels } = data.getTestData()
-
+    
     const topic = 'mnist'
     let currentRound = 0
 
@@ -48,6 +47,13 @@ const createNode = async (peerAddress, peerIdFromJson) => {
       PeerId.createFromJSON(require('./data/nodes/peer-id-node-1')),
       PeerId.createFromJSON(require('./data/nodes/peer-id-node-2')),
       PeerId.createFromJSON(require('./data/nodes/peer-id-node-3')),
+      PeerId.createFromJSON(require('./data/nodes/peer-id-node-4')),
+      PeerId.createFromJSON(require('./data/nodes/peer-id-node-5')),
+      PeerId.createFromJSON(require('./data/nodes/peer-id-node-6')),
+      PeerId.createFromJSON(require('./data/nodes/peer-id-node-7')),
+      PeerId.createFromJSON(require('./data/nodes/peer-id-node-8')),
+      PeerId.createFromJSON(require('./data/nodes/peer-id-node-9')),
+      PeerId.createFromJSON(require('./data/nodes/peer-id-node-10'))
     ])
 
     const nodes = {}
@@ -111,17 +117,11 @@ const createNode = async (peerAddress, peerIdFromJson) => {
       console.log("Current Round:", currentRound + 1)
 
       await model.fit(trainImages, trainLabels, {
-        epochs: 1,
+        epochs: 10,
         batchSize: 10
       })
       console.log("Train End!")
-      const evalOutput = model.evaluate(testImages, testLabels)
-      console.log(
-        `\nEvaluation result:\n` +
-        `  Loss = ${evalOutput[0].dataSync()[0].toFixed(3)}; ` +
-        `Accuracy = ${evalOutput[1].dataSync()[0].toFixed(3)}`)
-
-
+      
       const trainedModelToDict = await utils.modelToDict(model)
       trainedModelToDict["roundIndex"] = currentRound
       trainedModelToDict["nodeId"] = currentNodeId
@@ -129,20 +129,29 @@ const createNode = async (peerAddress, peerIdFromJson) => {
       await node.pubsub.publish(topic, serializedArray)
       console.log("Model Published!!")
 
-      while (Object.keys(recievedNode).length < 2) {await utils.delay(1 * 1000)}
+      while (Object.keys(recievedNode).length < 9) {await utils.delay(1 * 100)}
 
       for (const layerName of Object.keys(globalModel)) {
         // weight
         utils.dictSum(globalModel[layerName]["data"][0], trainedModelToDict[layerName]["data"][0])
-        utils.dictDivide(globalModel[layerName]["data"][0], 3)
+        utils.dictDivide(globalModel[layerName]["data"][0], 10)
         // bias
         utils.dictSum(globalModel[layerName]["data"][1], trainedModelToDict[layerName]["data"][1])
-        utils.dictDivide(globalModel[layerName]["data"][1], 3)
+        utils.dictDivide(globalModel[layerName]["data"][1], 10)
       }
 
       utils.dictToModel(model, globalModel)
       recievedNode.length = 0
       currentRound += 1
+    }
+
+    if(currentNodeId == "1"){
+      const { images: testImages, labels: testLabels } = data.getTestData()
+      const evalOutput = model.evaluate(testImages, testLabels)
+      console.log(
+        `\nEvaluation result:\n` +
+        `  Loss = ${evalOutput[0].dataSync()[0].toFixed(3)}; ` +
+        `Accuracy = ${evalOutput[1].dataSync()[0].toFixed(3)}`)
     }
 
   })()
